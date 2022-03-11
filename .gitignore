@@ -1,3 +1,6 @@
+# Credentials
+config/google.json
+
 # Logs
 logs
 *.log
