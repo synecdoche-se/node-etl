@@ -1,14 +1,17 @@
 const AbstractTransformer = require('./AbstractTransformer');
 
+/**
+ * Hipsterfy the user data.
+ */
 class HipsterUserTransformer extends AbstractTransformer {
   constructor() {
     super();
     this.key = 'hipsterUser';
   }
 
-  /**
-     * Add hipster slogan to users.
+    /**
      * @param {{}} data
+     * @returns {[{}]}
      */
   transformData(data) {
     const { hipsters, users } = data;
@@ -16,6 +19,9 @@ class HipsterUserTransformer extends AbstractTransformer {
     let aka = '';
 
     for (let i = 0; i < users.length; i++) {
+      if ( ! hipsters[i] || ! users[i] ) {
+        continue;
+      }
       aka = this.parseAka(hipsters[i].words);
       hipsterUsers.push(
         {
@@ -31,6 +37,10 @@ class HipsterUserTransformer extends AbstractTransformer {
     return hipsterUsers;
   }
 
+    /**
+     * @param {[string]} words
+     * @returns {string}
+     */
   parseAka(words) {
     return words.slice(0, 2).join(' ').toLowerCase().split(' ')
       .map((word) => (word.charAt(0).toUpperCase() + word.slice(1)))

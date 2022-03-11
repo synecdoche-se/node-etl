@@ -1,48 +1,50 @@
 const RandomUserExtractor = require('./src/extractors/RandomUserExtractor');
 const HipsterStuffExtractor = require('./src/extractors/HipsterStuffExtractor');
 const HipsterUserTransformer = require('./src/transformers/HipsterUserTransformer');
+const UserSocialTransformer = require('./src/transformers/UserSocialTransformer');
 
 const extractData = async () => {
-  // Run extractors.
-  const extractors = [
-    new RandomUserExtractor(),
-    new HipsterStuffExtractor(),
-  ];
+    // Run extractors.
+    const extractors = [
+        new RandomUserExtractor(),
+        new HipsterStuffExtractor(),
+    ];
 
-  return Promise.allSettled(
-    extractors.map(
-      (e) => e.extractData(),
-    ),
-  );
+    return Promise.allSettled(
+        extractors.map(
+            (e) => e.extractData(),
+        ),
+    );
 };
 
 const transformData = (data) => {
-  const transformers = [
-    new HipsterUserTransformer(),
-  ];
+    const transformers = [
+        new HipsterUserTransformer(),
+        new UserSocialTransformer(),
+    ];
 
-  const transformedData = {};
+    const transformedData = {};
 
-  transformers.forEach((transformer) => {
-    transformedData[transformer.key] = transformer.transformData(data);
-  });
+    transformers.forEach((transformer) => {
+        transformedData[transformer.key] = transformer.transformData(data);
+    });
 
-  return transformedData;
+    return transformedData;
 };
 
 const startPipeline = async () => {
-  // Extract.
-  const [userResp, hipsterResp] = await extractData();
+    // Extract.
+    const [userResp, hipsterResp] = await extractData();
 
-  const extractedData = {
-    users: userResp.value.data,
-    hipsters: hipsterResp.value.data,
-  };
+    const extractedData = {
+        users: userResp.value.data,
+        hipsters: hipsterResp.value.data,
+    };
 
-  // Transform.
-  const transformedData = transformData(extractedData);
+    // Transform.
+    const transformedData = transformData(extractedData);
 
-  console.log(transformedData);
+    console.log(transformedData);
 };
 
 startPipeline();
