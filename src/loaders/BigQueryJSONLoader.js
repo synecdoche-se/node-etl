@@ -36,11 +36,9 @@ class BigQueryJSONLoader extends AbstractLoader {
         try {
             const data = await dataset.get();
             const apiResponse = data[1];
-            console.log(`apiResponse: ${JSON.stringify(apiResponse)}`);
         } catch (e) {
             if (e.code === 404) {
-                console.log(`${e.message} >>> Creating table: ${tableId}`);
-                await createBigQueryTablePartitioned(tableId, schema);
+                console.log(`${e.message} table didn't exist: ${tableId}`);
             }
         }
     }
@@ -51,10 +49,9 @@ class BigQueryJSONLoader extends AbstractLoader {
         try {
             const data = await bqtable.get();
             const apiResponse = data[1];
-            console.log(`apiResponse: ${JSON.stringify(apiResponse)}`);
         } catch (e) {
             if (e.code === 404) {
-                console.log(`${e.message} >>> Creating table: ${this.table}`);
+                console.log(`${e.message} table didn't exist: ${this.table}`);
             }
         }
     }
@@ -95,12 +92,12 @@ class BigQueryJSONLoader extends AbstractLoader {
 
             this.uploadJsonToStorage(table, entryJson)
                 .then(resp => {
-                    const [job] =  this.bigquery
+                    this.bigquery
                         .dataset(this.dataset)
                         .table(table)
                         .load(this.storage.bucket(this.bucketName).file(`bq-load-${table}.json`), metadata);
 
-                    console.log( 'Successfully loaded data' );
+                    console.log( `Successfully loaded ${table} table data` );
                 })
                 .catch(err => console.log(err));
         }
