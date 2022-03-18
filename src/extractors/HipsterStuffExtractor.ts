@@ -1,11 +1,11 @@
-const AbstractExtractor = require('./AbstractExtractor');
+const AbstractExtractor = require("./AbstractExtractor");
 
 class HipsterStuffExtractor extends AbstractExtractor {
   constructor() {
     super();
 
-    this.apiBase = 'https://random-data-api.com/api/';
-    this.endpoint = 'hipster/random_hipster_stuff';
+    this.apiBase = "https://random-data-api.com/api/";
+    this.endpoint = "hipster/random_hipster_stuff";
   }
 
   extractData(params = {}) {

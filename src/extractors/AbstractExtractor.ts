@@ -1,16 +1,16 @@
-const axios = require('axios');
+const axios = require("axios");
 
 class AbstractExtractor {
-  apiBase = '';
+  apiBase = "";
 
-  endpoint = '';
+  endpoint = "";
 
   /**
    * @param {} params Optional GET params to send to the extract source.
    */
   extractData(params = {}) {
     return axios.get(this.apiBase + this.endpoint, {
-      params,
+      params
     });
   }
 }
