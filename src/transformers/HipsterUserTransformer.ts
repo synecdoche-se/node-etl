@@ -1,45 +1,33 @@
+import type { ExtractedData, HipstersAndUsers, HipsterUser } from "../types";
 import AbstractTransformer from "./AbstractTransformer";
 
-/**
- * Hipsterfy the user data.
- */
-export default class HipsterUserTransformer extends AbstractTransformer {
-  constructor() {
-    super();
-    this.key = "hipsterUser";
+export default class HipsterUserTransformer extends AbstractTransformer<
+  HipstersAndUsers,
+  HipsterUser[]
+> {
+  constructor(key: string) {
+    super(key);
   }
 
-  /**
-   * @param {{}} data
-   * @returns {[{}]}
-   */
-  transformData(data) {
-    const { hipsters, users } = data;
-    const hipsterUsers = [];
-    let aka = "";
+  public transform({ hipsters, users }: ExtractedData): HipsterUser[] {
+    return users.reduce((acc, user, i) => {
+      if (!hipsters[i]) return acc;
 
-    for (let i = 0; i < users.length; i++) {
-      if (!hipsters[i] || !users[i]) {
-        continue;
-      }
-      aka = this.parseAka(hipsters[i].words);
-      hipsterUsers.push({
-        id: users[i].id,
-        firstName: `${users[i].first_name} a.k.a ${aka}`,
-        lastName: users[i].last_name,
-        email: users[i].email,
-        slogan: hipsters[i].sentence
-      });
-    }
-
-    return hipsterUsers;
+      const aka = this.parseAka(hipsters[i].words);
+      return [
+        ...acc,
+        {
+          id: user.id,
+          firstName: `${user.first_name} a.k.a ${aka}`,
+          lastName: user.last_name,
+          email: user.email,
+          slogan: hipsters[i].sentence
+        }
+      ];
+    }, []);
   }
 
-  /**
-   * @param {[string]} words
-   * @returns {string}
-   */
-  parseAka(words) {
+  private parseAka(words: string[]): string {
     return words
       .slice(0, 2)
       .join(" ")
