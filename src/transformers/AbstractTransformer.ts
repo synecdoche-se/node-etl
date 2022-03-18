@@ -1,8 +1,5 @@
-export default class AbstractTransformer {
-  key = "";
+export default abstract class AbstractTransformer<T, D> {
+  constructor(public key: string = "") {}
 
-  /**
-   * @param {{}} data
-   */
-  transformData(data) {}
+  abstract transform(data: T): D;
 }
