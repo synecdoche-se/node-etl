@@ -1,14 +1,17 @@
+import type { TransformedData } from "../types";
 import { BigQuery } from "@google-cloud/bigquery";
 import { Storage } from "@google-cloud/storage";
-import AbstractLoader from "./AbstractLoader";
+import AbstractBigQueryLoader from "./AbstractBigQueryLoader";
 import config from "../../config/google.json";
 
-export default class BigQueryJSONLoader extends AbstractLoader {
-  constructor() {
-    super();
+export default class BigQueryJSONLoader extends AbstractBigQueryLoader {
+  public bigQuery: BigQuery;
+  public storage: Storage;
+  public bucketName: string;
+  public filename: string;
 
-    this.dataset = "test";
-    this.schema = "";
+  constructor() {
+    super("test", "", null);
 
     const creds = {
       projectId: config.project_id,
@@ -18,51 +21,13 @@ export default class BigQueryJSONLoader extends AbstractLoader {
       }
     };
 
-    this.bigquery = new BigQuery(creds);
+    this.bigQuery = new BigQuery(creds);
     this.storage = new Storage(creds);
     this.bucketName = "nodetl";
     this.filename = "bigquery-sample.json";
   }
 
-  async uploadJsonToStorage(table, json) {
-    const bucket = this.storage.bucket("nodetl");
-    const fileName = bucket.file(`bq-load-${table}.json`);
-
-    return fileName.save(json);
-  }
-
-  async datasetExists() {
-    const dataset = this.bigquery.dataset(this.dataset);
-    try {
-      const data = await dataset.get();
-      const apiResponse = data[1];
-    } catch (e) {
-      if (e.code === 404) {
-        console.log(`${e.message} table didn't exist: ${tableId}`);
-      }
-    }
-  }
-
-  async tableExists(table) {
-    const dataset = this.bigquery.dataset(this.dataset);
-    const bqtable = dataset.table(table);
-    try {
-      const data = await bqtable.get();
-      const apiResponse = data[1];
-    } catch (e) {
-      if (e.code === 404) {
-        console.log(`${e.message} table didn't exist: ${this.table}`);
-      }
-    }
-  }
-
-  /**
-   * Load the JSON data to BigQuery.
-   * @param table
-   * @returns {awaited Promise<R>|Promise<R|any>|Promise<any>|*}
-   * @throws Error
-   */
-  async load(data) {
+  async load(transfomedData: TransformedData) {
     if (!config) {
       throw new Error(
         "You need a google.json config file to use the BigQuery loader."
@@ -73,40 +38,74 @@ export default class BigQueryJSONLoader extends AbstractLoader {
       throw new Error("Datset does not exist, please create it in BigQuery!");
     }
 
-    const metadata = {
-      sourceFormat: "NEWLINE_DELIMITED_JSON",
-      autodetect: true,
-      location: "europe-west6"
-    };
-
-    let entries = [];
-    let jsonData = "";
-
-    for (const table in data) {
-      let entryJson = "";
+    const promises = [];
+    for (const [table, data] of Object.entries(transfomedData)) {
       if (!this.tableExists(table)) {
         throw new Error("Table does not exist, please create it in BigQuery!");
       }
+      promises.push(this.upload(table, data));
+    }
 
-      data[table].forEach((entry) => {
-        entryJson += JSON.stringify(entry) + "\n";
+    await Promise.all(promises);
+  }
+
+  public async datasetExists() {
+    try {
+      const ds = this.bigQuery.dataset(this.dataset);
+      await ds.get();
+      return true;
+    } catch (e) {
+      if (e.code === 404) {
+        console.log(`data set didn't exist: ${this.dataset}`);
+      }
+      return false;
+    }
+  }
+
+  public async tableExists(table: string) {
+    try {
+      const dataset = this.bigQuery.dataset(this.dataset);
+      const bqtable = dataset.table(table);
+      await bqtable.get();
+      return true;
+    } catch (e) {
+      if (e.code === 404) {
+        console.log(`table didn't exist: ${table}`);
+      }
+      return false;
+    }
+  }
+
+  private async upload(table: string, data: any[]) {
+    try {
+      const entryJson = data.reduce(
+        (acc: string, entry: Record<string, unknown>) => {
+          return (acc += JSON.stringify(entry) + "\n");
+        },
+        ""
+      );
+
+      await this.uploadToStorage(entryJson);
+
+      const file = this.storage
+        .bucket(this.bucketName)
+        .file(`bq-load-${table}.json`);
+
+      await this.bigQuery.dataset(this.dataset).table(table).load(file, {
+        sourceFormat: "NEWLINE_DELIMITED_JSON",
+        autodetect: true,
+        location: "europe-west6"
       });
 
-      this.uploadJsonToStorage(table, entryJson)
-        .then((resp) => {
-          this.bigquery
-            .dataset(this.dataset)
-            .table(table)
-            .load(
-              this.storage
-                .bucket(this.bucketName)
-                .file(`bq-load-${table}.json`),
-              metadata
-            );
-
-          console.log(`Successfully loaded ${table} table data`);
-        })
-        .catch((err) => console.log(err));
+      console.log(`Successfully loaded ${table} table data`);
+    } catch (err) {
+      console.error(err);
     }
+  }
+
+  private async uploadToStorage(data: string | Buffer) {
+    const bucket = this.storage.bucket("nodetl");
+    const fileName = bucket.file(`bq-load-${this.table}.json`);
+    return fileName.save(data);
   }
 }
