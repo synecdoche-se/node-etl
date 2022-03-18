@@ -1,4 +1,4 @@
-class AbstractTransformer {
+export default class AbstractTransformer {
   key = "";
 
   /**
@@ -6,5 +6,3 @@ class AbstractTransformer {
    */
   transformData(data) {}
 }
-
-module.exports = AbstractTransformer;

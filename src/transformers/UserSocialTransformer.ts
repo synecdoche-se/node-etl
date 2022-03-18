@@ -1,6 +1,6 @@
-const AbstractTransformer = require("./AbstractTransformer");
+import AbstractTransformer from "./AbstractTransformer";
 
-class UserSocialTransformer extends AbstractTransformer {
+export default class UserSocialTransformer extends AbstractTransformer {
   constructor() {
     super();
     this.key = "userSocial";
@@ -48,5 +48,3 @@ class UserSocialTransformer extends AbstractTransformer {
     return JSON.stringify(cxList);
   }
 }
-
-module.exports = UserSocialTransformer;

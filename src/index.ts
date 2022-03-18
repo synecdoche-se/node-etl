@@ -1,8 +1,8 @@
-const RandomUserExtractor = require("./extractors/RandomUserExtractor");
-const HipsterStuffExtractor = require("./extractors/HipsterStuffExtractor");
-const HipsterUserTransformer = require("./transformers/HipsterUserTransformer");
-const UserSocialTransformer = require("./transformers/UserSocialTransformer");
-const BigQueryJSONLoader = require("./loaders/BigQueryJSONLoader");
+import HipsterStuffExtractor from "./extractors/HipsterStuffExtractor";
+import RandomUserExtractor from "./extractors/RandomUserExtractor";
+import BigQueryJSONLoader from "./loaders/BigQueryJSONLoader";
+import HipsterUserTransformer from "./transformers/HipsterUserTransformer";
+import UserSocialTransformer from "./transformers/UserSocialTransformer";
 
 const extractData = async () => {
   const extractors = [new RandomUserExtractor(), new HipsterStuffExtractor()];

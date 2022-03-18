@@ -1,9 +1,9 @@
-const AbstractTransformer = require("./AbstractTransformer");
+import AbstractTransformer from "./AbstractTransformer";
 
 /**
  * Hipsterfy the user data.
  */
-class HipsterUserTransformer extends AbstractTransformer {
+export default class HipsterUserTransformer extends AbstractTransformer {
   constructor() {
     super();
     this.key = "hipsterUser";
@@ -49,5 +49,3 @@ class HipsterUserTransformer extends AbstractTransformer {
       .join(" ");
   }
 }
-
-module.exports = HipsterUserTransformer;

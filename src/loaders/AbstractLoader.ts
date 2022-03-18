@@ -1,4 +1,4 @@
-class AbstractLoader {
+export default class AbstractLoader {
   dataset = "";
   table = "";
   schema = null;
@@ -21,5 +21,3 @@ class AbstractLoader {
    */
   async load(data) {}
 }
-
-module.exports = AbstractLoader;

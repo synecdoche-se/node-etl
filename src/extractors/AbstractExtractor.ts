@@ -1,6 +1,6 @@
-const axios = require("axios");
+import axios from "axios";
 
-class AbstractExtractor {
+export default class AbstractExtractor {
   apiBase = "";
 
   endpoint = "";

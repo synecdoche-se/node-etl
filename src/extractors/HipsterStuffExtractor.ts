@@ -1,6 +1,6 @@
-const AbstractExtractor = require("./AbstractExtractor");
+import AbstractExtractor from "./AbstractExtractor";
 
-class HipsterStuffExtractor extends AbstractExtractor {
+export default class HipsterStuffExtractor extends AbstractExtractor {
   constructor() {
     super();
 
@@ -12,5 +12,3 @@ class HipsterStuffExtractor extends AbstractExtractor {
     return super.extractData({ size: 30 });
   }
 }
-
-module.exports = HipsterStuffExtractor;

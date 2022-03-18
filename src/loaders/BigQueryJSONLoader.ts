@@ -1,9 +1,9 @@
-const { BigQuery } = require("@google-cloud/bigquery");
-const { Storage } = require("@google-cloud/storage");
-const AbstractLoader = require("./AbstractLoader");
-const config = require("../../config/google.json");
+import { BigQuery } from "@google-cloud/bigquery";
+import { Storage } from "@google-cloud/storage";
+import AbstractLoader from "./AbstractLoader";
+import config from "../../config/google.json";
 
-class BigQueryJSONLoader extends AbstractLoader {
+export default class BigQueryJSONLoader extends AbstractLoader {
   constructor() {
     super();
 
@@ -110,5 +110,3 @@ class BigQueryJSONLoader extends AbstractLoader {
     }
   }
 }
-
-module.exports = BigQueryJSONLoader;

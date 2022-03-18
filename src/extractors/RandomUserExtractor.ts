@@ -1,6 +1,5 @@
-const AbstractExtractor = require("./AbstractExtractor");
-
-class RandomUserExtractor extends AbstractExtractor {
+import AbstractExtractor from "./AbstractExtractor";
+export default class RandomUserExtractor extends AbstractExtractor {
   constructor() {
     super();
 
@@ -12,5 +11,3 @@ class RandomUserExtractor extends AbstractExtractor {
     return super.extractData({ size: 30 });
   }
 }
-
-module.exports = RandomUserExtractor;
