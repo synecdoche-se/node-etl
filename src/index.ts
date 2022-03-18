@@ -1,63 +1,40 @@
+import type { HipstersAndUsers, TransformedData } from "./types";
 import HipsterStuffExtractor from "./extractors/HipsterStuffExtractor";
 import RandomUserExtractor from "./extractors/RandomUserExtractor";
 import BigQueryJSONLoader from "./loaders/BigQueryJSONLoader";
 import HipsterUserTransformer from "./transformers/HipsterUserTransformer";
 import UserSocialTransformer from "./transformers/UserSocialTransformer";
 
-const extractData = async () => {
-  const extractors = [new RandomUserExtractor(), new HipsterStuffExtractor()];
-
-  return Promise.allSettled(extractors.map((e) => e.extractData()));
+const extract = () => {
+  return Promise.all([
+    new RandomUserExtractor().extract(),
+    new HipsterStuffExtractor().extract()
+  ]);
 };
 
-const transformData = (data) => {
-  const transformers = [
-    new HipsterUserTransformer(),
-    new UserSocialTransformer()
-  ];
-
-  const transformedData = {};
-
-  transformers.forEach((transformer) => {
-    transformedData[transformer.key] = transformer.transformData(data);
-  });
-
-  return transformedData;
-};
-
-const loadData = async (data) => {
-  const loaders = [new BigQueryJSONLoader()];
-
-  return Promise.allSettled(
-    loaders.map((l) => {
-      try {
-        l.load(data);
-      } catch (e) {
-        return null;
-      }
-    })
-  );
-};
-
-const startPipeline = async () => {
-  // Extract.
-  const [userResp, hipsterResp] = await extractData();
-
-  const extractedData = {
-    users: userResp.value.data,
-    hipsters: hipsterResp.value.data
+const transform = (data: HipstersAndUsers): TransformedData => {
+  return {
+    hipsterUser: new HipsterUserTransformer("hipsterUser").transform(data),
+    userSocial: new UserSocialTransformer("userSocial").transform(data)
   };
-
-  // Transform.
-  const transformedData = transformData(extractedData);
-
-  // Load.
-  const loaders = await loadData(transformedData);
 };
 
-startPipeline();
+const load = (data: TransformedData) => {
+  return Promise.all([new BigQueryJSONLoader().load(data)]);
+};
 
-/**
- * Sources:
- * API: https://random-data-api.com/
- */
+const start = async () => {
+  try {
+    // Extract
+    const [users, hipsters] = await extract();
+    // Transform
+    const transformed = transform({ users, hipsters });
+    // Load
+    await load(transformed);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+};
+
+start();
