@@ -1,18 +1,9 @@
-import axios from "axios";
+export default abstract class AbstractExtractor {
+  public url: string;
 
-export default class AbstractExtractor {
-  apiBase = "";
-
-  endpoint = "";
-
-  /**
-   * @param {} params Optional GET params to send to the extract source.
-   */
-  extractData(params = {}) {
-    return axios.get(this.apiBase + this.endpoint, {
-      params
-    });
+  constructor(apiBase: string, endpoint: string) {
+    this.url = apiBase + endpoint;
   }
-}
 
-module.exports = AbstractExtractor;
+  abstract extractData<T>(params: Record<string, unknown>): Promise<T>;
+}

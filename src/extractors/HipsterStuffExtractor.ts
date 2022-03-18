@@ -1,14 +1,16 @@
+import axios from "axios";
 import AbstractExtractor from "./AbstractExtractor";
-
 export default class HipsterStuffExtractor extends AbstractExtractor {
   constructor() {
-    super();
-
-    this.apiBase = "https://random-data-api.com/api/";
-    this.endpoint = "hipster/random_hipster_stuff";
+    super("https://random-data-api.com/api/", "hipster/random_hipster_stuff");
   }
 
-  extractData(params = {}) {
-    return super.extractData({ size: 30 });
+  public async extractData(params: Record<string, unknown> = {}): Promise<any> {
+    try {
+      const { data } = await axios.get(this.url, { params });
+      return data;
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
